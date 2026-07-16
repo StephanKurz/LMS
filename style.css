@@ -113,6 +113,10 @@ button {
   flex-wrap: wrap;
 }
 
+.result[hidden] {
+  display: none;
+}
+
 .cover {
   flex: 0 0 auto;
   width: 180px;
