@@ -159,8 +159,13 @@ button {
 
 .detail-list dd {
   margin: 0;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .detail-list a {
   color: var(--accent);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
