@@ -170,31 +170,31 @@ function setCoverImage(isbn, googleBooks) {
     "https://"
   );
 
-  const useGoogleOrPlaceholder = () => {
+  const useOpenLibraryOrPlaceholder = () => {
     coverImg.onload = null;
     coverImg.onerror = null;
-    if (googleThumbnail) {
-      coverImg.onerror = () => {
-        coverImg.onerror = null;
-        coverImg.src = PLACEHOLDER_COVER;
-      };
-      coverImg.src = googleThumbnail;
-    } else {
-      coverImg.src = PLACEHOLDER_COVER;
-    }
-  };
-
-  // Open Library returns a tiny 1x1 placeholder (not a 404) when no cover exists.
-  coverImg.onload = () => {
-    if (coverImg.naturalWidth <= 1) {
-      useGoogleOrPlaceholder();
-    } else {
+    coverImg.onload = () => {
       coverImg.onload = null;
       coverImg.onerror = null;
-    }
+      // Open Library returns a tiny 1x1 placeholder (not a 404) when no cover exists.
+      if (coverImg.naturalWidth <= 1) {
+        coverImg.src = PLACEHOLDER_COVER;
+      }
+    };
+    coverImg.onerror = () => {
+      coverImg.onerror = null;
+      coverImg.src = PLACEHOLDER_COVER;
+    };
+    coverImg.src = openLibraryCover;
   };
-  coverImg.onerror = useGoogleOrPlaceholder;
-  coverImg.src = openLibraryCover;
+
+  if (googleThumbnail) {
+    coverImg.onload = null;
+    coverImg.onerror = useOpenLibraryOrPlaceholder;
+    coverImg.src = googleThumbnail;
+  } else {
+    useOpenLibraryOrPlaceholder();
+  }
 }
 
 function showStatus(message, isError) {
