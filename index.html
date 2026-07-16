@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ISBN-Suche</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <h1>ISBN-Suche</h1>
+    <p class="subtitle">ISBN eingeben und Artikeldaten aus öffentlichen Buch-Datenbanken abrufen.</p>
+
+    <form id="search-form" class="search-form" autocomplete="off">
+      <input
+        type="text"
+        id="isbn-input"
+        name="isbn"
+        placeholder="z. B. 9783150000267 oder 3-15-000026-9"
+        inputmode="numeric"
+      />
+      <button type="submit" id="search-btn">Suchen</button>
+      <button type="button" id="reset-btn">Zurücksetzen</button>
+    </form>
+
+    <div id="status" class="status" hidden></div>
+
+    <section id="result" class="result" hidden>
+      <div class="cover">
+        <img id="cover-img" alt="Cover" />
+      </div>
+      <div class="details">
+        <h2 id="detail-title"></h2>
+        <p id="detail-authors" class="authors"></p>
+        <dl id="detail-list" class="detail-list"></dl>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
