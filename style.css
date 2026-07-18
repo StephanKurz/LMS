@@ -36,6 +36,13 @@ body {
   padding: 2rem 1.25rem 4rem;
 }
 
+.version {
+  margin-top: 2rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
 h1 {
   margin-bottom: 0.25rem;
 }
@@ -143,6 +150,12 @@ button {
 .authors {
   color: var(--muted);
   margin-top: 0;
+}
+
+.source {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: 0.25rem 0 0;
 }
 
 .detail-list {
