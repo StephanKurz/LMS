@@ -8,6 +8,8 @@ const titleEl = document.getElementById("detail-title");
 const authorsEl = document.getElementById("detail-authors");
 const detailList = document.getElementById("detail-list");
 
+const GOOGLE_BOOKS_API_KEY = window.GOOGLE_BOOKS_API_KEY || "";
+
 const PLACEHOLDER_COVER =
   "data:image/svg+xml;utf8," +
   encodeURIComponent(
@@ -89,7 +91,12 @@ async function fetchGoogleBooks(isbn) {
   // country=DE is required: Google Books filters/omits results by the
   // geolocated request IP, which drops region-restricted German titles
   // when the request comes from a server/proxy with unclear geolocation.
-  const url = `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&country=DE`;
+  let url = `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&country=DE`;
+  // Without an API key, requests share a small, global anonymous quota
+  // that can run dry regardless of who's asking (see config.example.js).
+  if (GOOGLE_BOOKS_API_KEY) {
+    url += `&key=${encodeURIComponent(GOOGLE_BOOKS_API_KEY)}`;
+  }
   const response = await fetch(url);
   if (!response.ok) throw new Error("Google Books request failed");
   const data = await response.json();
