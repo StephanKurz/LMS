@@ -152,6 +152,12 @@ button {
   margin-top: 0;
 }
 
+.source {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: 0.25rem 0 0;
+}
+
 .detail-list {
   display: grid;
   grid-template-columns: max-content 1fr;

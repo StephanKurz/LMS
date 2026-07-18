@@ -6,6 +6,7 @@ const resultEl = document.getElementById("result");
 const coverImg = document.getElementById("cover-img");
 const titleEl = document.getElementById("detail-title");
 const authorsEl = document.getElementById("detail-authors");
+const sourceEl = document.getElementById("detail-source");
 const detailList = document.getElementById("detail-list");
 const versionEl = document.getElementById("app-version");
 
@@ -39,6 +40,7 @@ function resetView() {
   statusEl.classList.remove("error");
   statusEl.textContent = "";
   detailList.innerHTML = "";
+  sourceEl.textContent = "";
   input.focus();
 }
 
@@ -141,6 +143,11 @@ function renderResult(isbn, openLibrary, googleBooks) {
 
   titleEl.textContent = title;
   authorsEl.textContent = authors.length ? authors.join(", ") : "Autor unbekannt";
+
+  const sources = [];
+  if (googleBooks) sources.push("Google Books");
+  if (openLibrary) sources.push("Open Library");
+  sourceEl.textContent = sources.length ? `Quelle: ${sources.join(", ")}` : "";
 
   detailList.innerHTML = "";
   addDetail("Verlag", publisher);
