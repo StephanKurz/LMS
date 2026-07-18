@@ -7,8 +7,14 @@ const coverImg = document.getElementById("cover-img");
 const titleEl = document.getElementById("detail-title");
 const authorsEl = document.getElementById("detail-authors");
 const detailList = document.getElementById("detail-list");
+const versionEl = document.getElementById("app-version");
 
 const GOOGLE_BOOKS_API_KEY = window.GOOGLE_BOOKS_API_KEY || "";
+const APP_VERSION = window.APP_VERSION || "";
+
+if (APP_VERSION) {
+  versionEl.textContent = `Version ${APP_VERSION}`;
+}
 
 const PLACEHOLDER_COVER =
   "data:image/svg+xml;utf8," +
