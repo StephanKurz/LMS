@@ -64,17 +64,19 @@ async function handleSearch() {
   showStatus("Suche läuft …", false);
   hide(resultEl);
 
-  const [openLibraryResult, googleBooksResult] = await Promise.allSettled([
+  const [openLibraryResult, googleBooksResult, dnbResult] = await Promise.allSettled([
     fetchOpenLibrary(isbn),
     fetchGoogleBooks(isbn),
+    fetchDNB(isbn),
   ]);
 
   const openLibrary =
     openLibraryResult.status === "fulfilled" ? openLibraryResult.value : null;
   const googleBooks =
     googleBooksResult.status === "fulfilled" ? googleBooksResult.value : null;
+  const dnb = dnbResult.status === "fulfilled" ? dnbResult.value : null;
 
-  if (!openLibrary && !googleBooks) {
+  if (!openLibrary && !googleBooks && !dnb) {
     showStatus(
       "Keine Daten zu dieser ISBN gefunden. Bitte ISBN prüfen.",
       true
@@ -83,7 +85,7 @@ async function handleSearch() {
   }
 
   hide(statusEl);
-  renderResult(isbn, openLibrary, googleBooks);
+  renderResult(isbn, openLibrary, googleBooks, dnb);
 }
 
 async function fetchOpenLibrary(isbn) {
@@ -112,39 +114,86 @@ async function fetchGoogleBooks(isbn) {
   return data.items[0].volumeInfo || null;
 }
 
-function renderResult(isbn, openLibrary, googleBooks) {
-  const title = openLibrary?.title || googleBooks?.title || "Unbekannter Titel";
+// Deutsche Nationalbibliothek: free, unauthenticated SRU catalog search
+// covering nearly every German-language book (legal deposit library),
+// used as the primary source for German titles that Google Books/Open
+// Library often miss. Returns Dublin Core XML rather than JSON.
+async function fetchDNB(isbn) {
+  const url = `https://services.dnb.de/sru/dnb?version=1.1&operation=searchRetrieve&query=isbn%3D${isbn}&recordSchema=oai_dc&maximumRecords=1`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("DNB request failed");
+  const text = await response.text();
+  const doc = new DOMParser().parseFromString(text, "application/xml");
+  if (doc.querySelector("parsererror")) return null;
+
+  const byTag = (root, tag) =>
+    Array.from(root.getElementsByTagName("*")).filter((el) => el.localName === tag);
+
+  const numberOfRecords = byTag(doc, "numberOfRecords")[0]?.textContent;
+  if (!numberOfRecords || Number(numberOfRecords) === 0) return null;
+
+  const dcRoot = byTag(doc, "dc")[0];
+  if (!dcRoot) return null;
+
+  const texts = (tag) =>
+    byTag(dcRoot, tag)
+      .map((el) => el.textContent.trim())
+      .filter(Boolean);
+
+  const link = texts("identifier").find((id) => id.startsWith("http")) || null;
+
+  return {
+    title: texts("title")[0] || null,
+    creators: texts("creator"),
+    publisher: texts("publisher")[0] || null,
+    date: texts("date")[0] || null,
+    subjects: texts("subject"),
+    description: texts("description")[0] || null,
+    language: texts("language")[0] || null,
+    link,
+  };
+}
+
+function renderResult(isbn, openLibrary, googleBooks, dnb) {
+  const title = dnb?.title || googleBooks?.title || openLibrary?.title || "Unbekannter Titel";
 
   const authors =
+    (dnb?.creators?.length && dnb.creators) ||
     openLibrary?.authors?.map((a) => a.name) ||
     googleBooks?.authors ||
     [];
 
   const publisher =
+    dnb?.publisher ||
     openLibrary?.publishers?.map((p) => p.name).join(", ") ||
     googleBooks?.publisher ||
     null;
 
-  const publishDate = openLibrary?.publish_date || googleBooks?.publishedDate || null;
+  const publishDate =
+    dnb?.date || openLibrary?.publish_date || googleBooks?.publishedDate || null;
 
   const pageCount = openLibrary?.number_of_pages || googleBooks?.pageCount || null;
 
-  const language = googleBooks?.language || null;
+  const language = dnb?.language || googleBooks?.language || null;
 
   const subjects =
+    (dnb?.subjects?.length && dnb.subjects.slice(0, 8)) ||
     openLibrary?.subjects?.map((s) => s.name).slice(0, 8) ||
     googleBooks?.categories ||
     [];
 
   const description =
-    typeof googleBooks?.description === "string" ? googleBooks.description : null;
+    (typeof dnb?.description === "string" && dnb.description) ||
+    (typeof googleBooks?.description === "string" && googleBooks.description) ||
+    null;
 
-  const infoLink = openLibrary?.url || googleBooks?.infoLink || null;
+  const infoLink = dnb?.link || openLibrary?.url || googleBooks?.infoLink || null;
 
   titleEl.textContent = title;
   authorsEl.textContent = authors.length ? authors.join(", ") : "Autor unbekannt";
 
   const sources = [];
+  if (dnb) sources.push("DNB");
   if (googleBooks) sources.push("Google Books");
   if (openLibrary) sources.push("Open Library");
   sourceEl.textContent = sources.length ? `Quelle: ${sources.join(", ")}` : "";
