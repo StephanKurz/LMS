@@ -9,4 +9,4 @@
 //
 // Ohne Key funktioniert die App weiterhin, teilt sich dann aber ein
 // kleines, weltweit gemeinsames Kontingent und kann öfter fehlschlagen.
-window.GOOGLE_BOOKS_API_KEY = "";
+window.GOOGLE_BOOKS_API_KEY = "AIzaSyAr2ZyzQi6qhd3NAuQmYjX4v1Aai3kCIz8";
