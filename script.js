@@ -86,7 +86,10 @@ async function fetchOpenLibrary(isbn) {
 }
 
 async function fetchGoogleBooks(isbn) {
-  const url = `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`;
+  // country=DE is required: Google Books filters/omits results by the
+  // geolocated request IP, which drops region-restricted German titles
+  // when the request comes from a server/proxy with unclear geolocation.
+  const url = `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&country=DE`;
   const response = await fetch(url);
   if (!response.ok) throw new Error("Google Books request failed");
   const data = await response.json();
